@@ -121,7 +121,8 @@ const getReviews = async(req, res) => {
       const reviewsWithUserDetails = reviews.map(review => {
         return {
           ...review.toJSON(),
-          userDetails: userProfiles[review.providerID] || null
+          providerDetails: userProfiles[review.providerID] || null,
+          userDetails: userProfiles[review.consumerID] || null
         };
       });
 
