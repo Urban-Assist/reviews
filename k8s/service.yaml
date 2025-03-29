@@ -4,7 +4,7 @@ metadata:
   name: reviews-service
 spec:
   selector:
-    app: reviews-deployment-secrets
+    app: reviews-deployment
   ports:
     - protocol: TCP
       port: 8089
