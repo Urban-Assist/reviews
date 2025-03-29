@@ -8,7 +8,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE_NAME: payment-service
+  IMAGE_NAME: reviews
   DOCKER_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
 
 jobs:
