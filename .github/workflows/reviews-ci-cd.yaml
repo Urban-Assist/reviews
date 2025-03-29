@@ -1,5 +1,5 @@
 
-name: Payment Service CI/CD
+name: Review Service CI/CD
 
 on:
   push:
@@ -47,5 +47,5 @@ jobs:
     - name: Deploy to Kubernetes
       run: |
         kubectl apply -f k8s/
-        kubectl rollout restart deployment payment-service
-        kubectl rollout status deployment payment-service
+        kubectl rollout restart deployment reviews-deployment
+        kubectl rollout status deployment reviews-deployment
