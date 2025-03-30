@@ -116,6 +116,7 @@ const getReviews = async(req, res) => {
       return res.status(404).json(new ApiResponse(404, null, "No reviews found for the provider: " + providerID));
     } else {
       const providerID = reviews.map(review => review.providerID);
+      const consumerID = reviews.map(review => review.consumerID);
       const providerProfile = await fetchMultipleUserProfiles(providerID, req.headers.authorization);
       const userProfile = await fetchMultipleUserProfiles(consumerID , req.headers.authorization);
       const reviewsWithUserDetails = reviews.map(review => {
