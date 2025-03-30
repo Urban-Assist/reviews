@@ -116,13 +116,13 @@ const getReviews = async(req, res) => {
       return res.status(404).json(new ApiResponse(404, null, "No reviews found for the provider: " + providerID));
     } else {
       const providerID = reviews.map(review => review.providerID);
-      const userProfiles = await fetchMultipleUserProfiles(providerID, req.headers.authorization);
-
+      const providerProfile = await fetchMultipleUserProfiles(providerID, req.headers.authorization);
+      const userProfile = await fetchMultipleUserProfiles(consumerID , req.headers.authorization);
       const reviewsWithUserDetails = reviews.map(review => {
         return {
           ...review.toJSON(),
-          providerDetails: userProfiles[review.providerID] || null,
-          userDetails: userProfiles[review.consumerID] || null
+          providerDetails: providerProfile[review.providerID] || null,
+          userDetails: userProfile[review.consumerID] || null
         };
       });
 
