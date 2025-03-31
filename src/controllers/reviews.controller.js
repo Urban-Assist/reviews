@@ -20,6 +20,7 @@ const addReview = async (req, res) => {
 
         //get the logged in user's ID
         const consumerID = req.user?.id;
+        console.log("review giver id:"+ consumerID);
         if (!consumerID) {
           return res.status(401).json(
             new ApiResponse(401,null, "User authentication required")
