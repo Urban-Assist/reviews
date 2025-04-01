@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-ISC-red.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-<img src="https://via.placeholder.com/200?text=Reviews+Service+Logo" alt="Reviews Service Logo" width="200"/>
+<img src="https://t4.ftcdn.net/jpg/13/09/96/05/240_F_1309960518_olkdyu3Nrzgt1EWBYxJBRc1Q81VB5jwj.jpg" alt="Reviews Service Logo" width="200"/>
 
 *Efficient and scalable review management for Urban Assist platform*
 
@@ -30,11 +30,12 @@ This microservice handles all review-related operations within the Urban Assist 
 <details>
 <summary>✨ Key Features</summary>
 
+- **Asynchronous Processing** - RabbitMQ for handling provider deletion events, contributing to the resiliency in the features.
 - **CRUD Operations** - Add, fetch, and delete reviews
 - **User Authentication** - Secure endpoints with JWT-based authentication
 - **Role-Based Authorization** - Fine-grained access control for users and admins
 - **Database Integration** - Seamless MySQL support via Sequelize ORM
-- **Asynchronous Processing** - RabbitMQ for handling provider deletion events
+
 - **Scalability** - Auto-scaling in Kubernetes environments
 - **High Availability** - Multi-node deployment for failover protection
 - **Rolling Updates** - Zero-downtime deployments with Kubernetes
@@ -157,25 +158,188 @@ kubectl get deployments
 
 ## 📡 API Endpoints
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|-------------|----------|
-| `/reviews/addReview` | POST | Add a new review | `{ "providerID": 1, "review": "Great service!", "rating": 5 }` | `{ "message": "Review created successfully", "status": 201 }` |
-| `/reviews/getReviews/:providerID` | GET | Fetch reviews for a provider | - | `{ "data": [ ...reviews ], "status": 200 }` |
-| `/reviews/randomReviews` | GET | Fetch random reviews | - | `{ "data": [ ...reviews ], "status": 200 }` |
-| `/reviews/providerDeleted` | DELETE | Delete reviews for a provider | `{ "userId": 1 }` | `{ "message": "Reviews deleted successfully", "status": 200 }` |
+> **Authentication Note**: For authenticated endpoints, include the JWT token in the Authorization header:
+> ```
+> Authorization: Bearer <your-jwt-token>
+> ```
 
-### Example Request
+| Endpoint | Method | Description |Secured|
+|----------|--------|-------------|-----------|
+|`/reviews/addReview`     |        POST | Add a new review |✅|
+|`/reviews/getReviews/:providerID`| GET | Fetch reviews for a provider |✅| 
+| `/reviews/randomReviews` |       GET | Fetch random reviews | ✅|
+| `/reviews/providerDeleted` |  DELETE | Delete reviews for a provider | ✅|
 
-```bash
-curl -X POST http://localhost:8089/reviews/addReview \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your-token>" \
-  -d '{
-    "providerID": 1,
-    "review": "Excellent service!",
-    "rating": 5
-  }'
+<details>
+<summary>📋 Request/Response Examples </summary>
+
+#### End point to add the review for a provider
+
+```http
+POST /reviews/addReview
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+
+Request:
+{
+    "providerID":1,
+    "review":"hellow worlds",
+    "rating":5,
+    "serviceType":"demo"
+}
+
+Response:
+
+{
+    "statusCode": 201,
+    "data": {
+        "createdAt": "2025-04-01T01:10:01.019Z",
+        "updatedAt": "2025-04-01T01:10:01.104Z",
+        "id": 9,
+        "providerID": 1,
+        "review": "hellow worlds",
+        "rating": 5,
+        "serviceType": "demo",
+        "consumerID": 2
+    },
+    "message": "Review created successfully for the provider 1",
+    "success": true
+}
+
 ```
+
+#### Fetch the reviews for an individual provider based on their ID.
+
+```http
+GET /reviews/getReviews/1
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+
+Response:
+
+{
+    "statusCode": 200,
+    "data": [
+        {
+            "id": 9,
+            "providerID": 1,
+            "consumerID": 2,
+            "review": "hellow worlds",
+            "rating": 5,
+            "serviceType": "demo",
+            "createdAt": "2025-04-01T01:10:01.000Z",
+            "updatedAt": "2025-04-01T01:10:01.000Z",
+            "providerDetails": {
+                "email": "vaibhavpatel9196@gmail.com",
+                "firstName": "vaibhav",
+                "lastName": "patel",
+                "phoneNumber": null,
+                "role": "admin",
+                "profilePicUrl": null,
+                "address": null
+            },
+            "userDetails": {
+                "email": "royep11756@deenur.com",
+                "firstName": "Robert",
+                "lastName": "Jr",
+                "phoneNumber": null,
+                "role": null,
+                "profilePicUrl": null,
+                "address": null
+            }
+        }
+    ],
+    "message": "Reviews found for the provider: 1",
+    "success": true
+}
+
+```
+
+
+#### Fetch random 5 reviews
+##### This endpoint fetch 5 random reviews based on the descending order of their associated rating. [Used in the home page.]
+
+```http
+GET /reviews/randomReviews
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+
+Response:
+{
+    "statusCode": 200,
+    "data": [
+        {
+            "id": 8,
+            "providerID": 11,
+            "consumerID": 12,
+            "review": "Had a great experience with the quality service",
+            "rating": 5,
+            "serviceType": "house cleaning",
+            "createdAt": "2025-04-01T01:08:02.000Z",
+            "updatedAt": "2025-04-01T01:08:02.000Z",
+            "userDetails": null
+        },
+        {
+            "id": 7,
+            "providerID": 11,
+            "consumerID": 2,
+            "review": "Great service and punctual",
+            "rating": 5,
+            "serviceType": "house cleaning",
+            "createdAt": "2025-03-31T20:50:07.000Z",
+            "updatedAt": "2025-03-31T20:50:07.000Z",
+            "userDetails": {
+                "email": "royep11756@deenur.com",
+                "firstName": "Robert",
+                "lastName": "Jr",
+                "phoneNumber": null,
+                "role": null,
+                "profilePicUrl": null,
+                "address": null
+            }
+        },
+        {
+            "id": 6,
+            "providerID": 3,
+            "consumerID": 9,
+            "review": "Excellent!",
+            "rating": 5,
+            "serviceType": "plumbing",
+            "createdAt": "2025-03-31T04:25:01.000Z",
+            "updatedAt": "2025-03-31T04:25:01.000Z",
+            "userDetails": {
+                "email": "q9pai@ptct.net",
+                "firstName": "John",
+                "lastName": "Doe",
+                "phoneNumber": null,
+                "role": "user",
+                "profilePicUrl": null,
+                "address": null
+            }
+        }
+    ],
+    "message": "Random reviews found",
+    "success": true
+}
+```
+
+
+#### Delete all the reviews associated with the provider.
+
+##### This endpoint listen on the rabbitMQ for the event; thus, there is no need to pass the Id in the params or body.
+```http
+Request:
+DELETE /reviews/providerDeleted	
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+
+Response
+{
+    X number of reviews deleted for Y number of provider.
+}
+```
+</details>
+ 
 
 ---
 
